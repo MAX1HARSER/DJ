@@ -1,0 +1,53 @@
+<!-- templates/post_detail.html -->
+{% extends "base.html" %}
+{% block content %}
+
+<div class="post-entry">
+<br>
+	<h2>{{ post.title }}</h2>
+	<p>{{ post.body }}</p>
+	<p>Автор поста: {{post.author.username}}</p>
+</div>
+
+
+
+{% if user.is_authenticated and request.user.id == post.author.id %}
+<p><a href="{% url 'post_edit' post.pk %}">Редактировать пост</a></p>
+<p><a href="{% url 'post_delete' post.pk %}">Удалить</a></p>
+{% endif %}
+
+<hr>
+	<h4>Рейтинг поста: {{post.rate}}</h4>
+	{% if user.is_authenticated %}
+	<form action="{% url 'post_like' post.pk %}" method="post">
+	{% csrf_token %}
+          <button type='submit' name='post_pk' value="{{post.pk}}">:)  {{ post.likes.count }}</button>
+	</form>
+	<form action="{% url 'post_dislike' post.pk %}" method="post">
+	{% csrf_token %}
+          <button type='submit' name='post_pk' value="{{post.pk}}">:(  {{ post.dislikes.count }}</button>
+	</form>
+	{% endif %}
+
+
+<hr>
+
+<hr>
+	<h4>Коментарии</h4>
+	{% if post.comment_set.all.count == 0 %}
+		<p>Нет коментариев к данному посту</p>
+	{% else %}
+		{% for comment in post.comment_set.all %}
+			<p>{{ comment.author }}: {{ comment }}</p>
+		{% endfor %}
+	{% endif %}
+<hr>
+{% if user.is_authenticated %}
+<h4>Комментировать</h4>
+<form method="post">{% csrf_token %}
+          {{ form.as_p }}
+          <button>Поделиться своим мнением</button>
+</form>
+{% endif %}
+{% endblock content %}
+
